@@ -1,0 +1,22 @@
+data/coco
+data/porting
+data/skip-thoughts
+data/vqa
+data/vqa2
+
+logs/porting
+logs/vqa_old
+logs/vqa
+logs/vqa2
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac
+.DS_Store
+._.DS_Store
+
+.ipynb_checkpoints
+*.html

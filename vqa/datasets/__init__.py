@@ -1,0 +1,1 @@
+from .vqa import factory_VQA
