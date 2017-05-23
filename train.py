@@ -3,6 +3,7 @@ import os
 import shutil
 import yaml
 import json
+import click
 from pprint import pprint
 
 import torch
@@ -139,6 +140,16 @@ def main():
     if args.resume:
         args.start_epoch, best_acc1, exp_logger = load_checkpoint(model.module, optimizer,
             os.path.join(options['logs']['dir_logs'], args.resume))
+    else:
+        # Or create logs directory
+        if os.path.isdir(options['logs']['dir_logs']):
+            if click.confirm('Logs directory already exists in {}. Erase?'
+                .format(options['logs']['dir_logs'], default=False)):
+                os.system('rm -r '+options['logs']['dir_logs'])
+            else:
+                return
+        os.system('mkdir -p '+options['logs']['dir_logs'])
+        os.system('cp {} {}'.format(args.path_opt, options['logs']['dir_logs']))
         
     if exp_logger is None:
         # Set loggers
