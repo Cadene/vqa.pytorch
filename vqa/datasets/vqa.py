@@ -118,17 +118,19 @@ class VQA(AbstractVQA):
 
     def _raw(self):
         dir_zip = os.path.join(self.dir_raw, 'zip')
-        dir_annotations = os.path.join(self.dir_raw, 'annotations')
+        dir_ann = os.path.join(self.dir_raw, 'annotations')
+        os.system('mkdir -p '+dir_zip)
+        os.system('mkdir -p '+dir_ann)
         os.system('wget http://visualqa.org/data/mscoco/vqa/Questions_Train_mscoco.zip -P '+dir_zip)
         os.system('wget http://visualqa.org/data/mscoco/vqa/Questions_Val_mscoco.zip -P '+dir_zip)
         os.system('wget http://visualqa.org/data/mscoco/vqa/Questions_Test_mscoco.zip -P '+dir_zip)
         os.system('wget http://visualqa.org/data/mscoco/vqa/Annotations_Train_mscoco.zip -P '+dir_zip)
         os.system('wget http://visualqa.org/data/mscoco/vqa/Annotations_Val_mscoco.zip -P '+dir_zip)
-        os.system('unzip '+os.path.join(dir_zip, 'Questions_Train_mscoco.zip')+' -d '+dir_annotations)
-        os.system('unzip '+os.path.join(dir_zip, 'Questions_Val_mscoco.zip')+' -d '+dir_annotations)
-        os.system('unzip '+os.path.join(dir_zip, 'Questions_Test_mscoco.zip')+' -d '+dir_annotations)
-        os.system('unzip '+os.path.join(dir_zip, 'Annotations_Train_mscoco.zip')+' -d '+dir_annotations)
-        os.system('unzip '+os.path.join(dir_zip, 'Annotations_Val_mscoco.zip')+' -d '+dir_annotations)
+        os.system('unzip '+os.path.join(dir_zip, 'Questions_Train_mscoco.zip')+' -d '+dir_ann)
+        os.system('unzip '+os.path.join(dir_zip, 'Questions_Val_mscoco.zip')+' -d '+dir_ann)
+        os.system('unzip '+os.path.join(dir_zip, 'Questions_Test_mscoco.zip')+' -d '+dir_ann)
+        os.system('unzip '+os.path.join(dir_zip, 'Annotations_Train_mscoco.zip')+' -d '+dir_ann)
+        os.system('unzip '+os.path.join(dir_zip, 'Annotations_Val_mscoco.zip')+' -d '+dir_ann)
 
     def _interim(self):
         vqa_interim(self.opt['dir'])
@@ -138,6 +140,7 @@ class VQA(AbstractVQA):
 
 
 def factory_VQA(data_split, opt, opt_coco=None):
+
     dataset_img = None
     if opt_coco is not None:
         dataset_img = factory_COCO(data_split, opt_coco)

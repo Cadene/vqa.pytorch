@@ -3,6 +3,7 @@ import os
 import numpy as np
 import h5py
 import torch.utils.data as data
+import torchvision.transforms as transforms
 
 from ..lib import utils
 from .images import ImagesFolder, AbstractImagesDataset, default_loader
@@ -23,7 +24,8 @@ class COCOImages(AbstractImagesDataset):
         super(COCOImages, self).__init__(data_split, opt, transform, loader)
         self.split_name = split_name(self.data_split)
         self.dir_split = os.path.join(self.dir_raw, self.split_name)
-        self.dataset = ImageFolder(self.dir_split, transform=self.transform, loader=self.loader)
+        self.dataset = ImagesFolder(self.dir_split, transform=self.transform, loader=self.loader)
+        self.name_to_index = self._load_name_to_index()
 
     def _raw(self):
         if self.data_split in ['train', 'val']:
@@ -35,7 +37,7 @@ class COCOImages(AbstractImagesDataset):
         os.execute('unzip '+os.path.join(self.dir_raw, self.split_name+'.zip')+' -d '+self.dir_raw)
 
     def _load_name_to_index(self):
-        self.name_to_index = {item['name']:index for index, item in enumerate(self)}
+        self.name_to_index = {name:index for index, name in enumerate(self.dataset.imgs)}
         return self.name_to_index
 
     def __getitem__(self, index):

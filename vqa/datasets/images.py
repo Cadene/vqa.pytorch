@@ -62,6 +62,10 @@ class AbstractImagesDataset(data.Dataset):
         if not os.path.exists(self.dir_raw):
             self._raw()
 
+    def get_by_name(self, image_name):
+        index = self.name_to_index[image_name]
+        return self[index]
+
     def _raw(self):
         raise NotImplementedError
 
