@@ -145,11 +145,17 @@ def main():
         if os.path.isdir(options['logs']['dir_logs']):
             if click.confirm('Logs directory already exists in {}. Erase?'
                 .format(options['logs']['dir_logs'], default=False)):
-                os.system('rm -r '+options['logs']['dir_logs'])
+                os.system('rm -r ' + options['logs']['dir_logs'])
             else:
                 return
-        os.system('mkdir -p '+options['logs']['dir_logs'])
-        os.system('cp {} {}'.format(args.path_opt, options['logs']['dir_logs']))
+        os.system('mkdir -p ' + options['logs']['dir_logs'])
+        path_new_opt = os.path.join(options['logs']['dir_logs'],
+                       os.path.basename(args.path_opt))
+        path_args = os.path.join(options['logs']['dir_logs'], 'args.yaml')
+        with open(path_new_opt, 'w') as f:
+            yaml.dump(options, f, default_flow_style=False)
+        with open(path_args, 'w') as f:
+            yaml.dump(vars(args), f, default_flow_style=False)
         
     if exp_logger is None:
         # Set loggers
