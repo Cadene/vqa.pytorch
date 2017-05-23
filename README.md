@@ -88,7 +88,18 @@ Data will be automaticaly downloaded and preprocessed when needed. Links to data
 
 #### Features
 
-As we first developped on Lua/Torch7, we used the features of [Resnet-152 pretrained with Torch7](https://github.com/facebook/fb.resnet.torch). We will make the features available for download in few days.
+As we first developped on Lua/Torch7, we used the features of [Resnet-152 pretrained with Torch7](https://github.com/facebook/fb.resnet.torch). We plan to port the model in pytorch as well. Meanwhile, you can download the features as following:
+
+```
+mkdir -p data/coco/extract/arch,fbresnet152torch
+cd data/coco/extract/arch,fbresnet152torch
+wget https://data.lip6.fr/coco/trainset.hdf5
+wget https://data.lip6.fr/coco/trainset.txt
+wget https://data.lip6.fr/coco/valset.hdf5
+wget https://data.lip6.fr/coco/valset.txt
+wget https://data.lip6.fr/coco/testset.hdf5
+wget https://data.lip6.fr/coco/testset.txt
+```
 
 /!\ Notice that we've tried the features of [Resnet-152 pretrained with pytorch](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py) and got lower results.
 
@@ -223,19 +234,19 @@ python train.py
 Run a MutanNoAtt model with default options.
 
 ```
-python train.py --path_opt options/mutan_noatt.yaml --dir_logs logs/mutan_noatt
+python train.py --path_opt options/vqa/mutan_noatt.yaml --dir_logs logs/vqa/mutan_noatt
 ```
 
 Run a MutanAtt model on the trainset and evaluate on the valset after each epoch.
 
 ```
-python train.py --vqa_trainsplit train --path_opt options/mutan_att.yaml 
+python train.py --vqa_trainsplit train --path_opt options/vqa/mutan_att.yaml 
 ``` 
 
 Run a MutanAtt model on the trainset and valset (by default) and run throw the testset after each epoch (produce a results file that you can submit to the evaluation server).
 
 ```
-python train.py --vqa_trainsplit trainval --path_opt options/mutan_att.yaml
+python train.py --vqa_trainsplit trainval --path_opt options/vqa/mutan_att.yaml
 ``` 
 
 
@@ -244,13 +255,13 @@ python train.py --vqa_trainsplit trainval --path_opt options/mutan_att.yaml
 Restart the model from the last checkpoint.
 
 ```
-python train.py --path_opt options/mutan_noatt.yaml --dir_logs logs/mutan_noatt --resume ckpt
+python train.py --path_opt options/vqa/mutan_noatt.yaml --dir_logs logs/vqa/mutan_noatt --resume ckpt
 ```
 
 Restart the model from the best checkpoint.
 
 ```
-python train.py --path_opt options/mutan_noatt.yaml --dir_logs logs/mutan_noatt --resume best
+python train.py --path_opt options/vqa/mutan_noatt.yaml --dir_logs logs/vqa/mutan_noatt --resume best
 ```
 
 #### Evaluate models on VQA
@@ -258,7 +269,7 @@ python train.py --path_opt options/mutan_noatt.yaml --dir_logs logs/mutan_noatt 
 Evaluate the model from the best checkpoint. If your model has been trained on the training set only (`vqa_trainsplit=train`), the model will be evaluate on the valset and will run throw the testset. If it was trained on the trainset + valset (`vqa_trainsplit=trainval`), it will not be evaluate on the valset.
 
 ```
-python train.py --vqa_trainsplit train --path_opt options/mutan_att.yaml --dir_logs logs/mutan_att --resume best -e
+python train.py --vqa_trainsplit train --path_opt options/vqa/mutan_att.yaml --dir_logs logs/vqa/mutan_att --resume best -e
 ```
 
 ## Acknowledgment
