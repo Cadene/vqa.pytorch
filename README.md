@@ -8,6 +8,31 @@ The goal of this repo is two folds:
 
 If you have any questions about our code or model, don't hesitate to contact us or to submit any issues. Pull request are welcome!
 
+#### Summary:
+
+* [Introduction](#introduction)
+    * [What is the task about?](#what-is-the-task-about)
+    * [Quick insight about our method](#quick-insight-about-our-method)
+* [Installation](#installation)
+    * [Requirements](#requirements)
+    * [Submodules](#submodules)
+    * [Data](#data)
+* [Reproducing results](#reproducing-results)
+    * [Features](#features)
+    * [Pretrained models](#pretrained-models)
+* [Documentation](#documentation)
+    * [Architecture](#architecture)
+    * [Options](#options)
+    * [Datasets](#datasets)
+    * [Models](#models)
+* [Quick examples](#quick-examples)
+    * [Extract features from COCO](#extract-features-from-coco)
+    * [Train models on VQA](#train-models-on-vqa)
+    * [Monitor training](#monitor-training)
+    * [Restart training](#restart-training)
+    * [Evaluate models on VQA](#evaluate-models-on-vqa)
+* [Acknowledgment](#acknowledgment)
+
 ## Introduction
 
 ### What is the task about?
@@ -46,11 +71,9 @@ One of our claim is that the multimodal fusion between the image and the questio
 - our proposed Mutan (based on a Tucker Decomposition) for the fusion scheme,
 - an attention scheme with two "glimpses".
 
-## Using this code
+## Installation
 
 ### Requirements
-
-#### Installation
 
 First install python 3 (we don't provide support for python 2). We advise you to install python 3 and pytorch with Anaconda:
 
@@ -72,21 +95,21 @@ cd vqa.pytorch
 pip install -r requirements.txt
 ```
 
-#### Submodules
+### Submodules
 
 Our code has two external dependencies:
 
 - [VQA](https://github.com/Cadene/VQA) is used to evaluate results files on the valset with the OpendEnded accuracy,
 - [skip-thoughts.torch](https://github.com/Cadene/skip-thoughts.torch) is used to import pretrained GRUs and embeddings.
 
-#### Data
+### Data
 
 Data will be automaticaly downloaded and preprocessed when needed. Links to data are stored in `vqa/datasets/vqa.py` and `vqa/datasets/coco.py`.
 
 
-### Reproducing results
+## Reproducing results
 
-#### Features
+### Features
 
 As we first developped on Lua/Torch7, we used the features of [Resnet-152 pretrained with Torch7](https://github.com/facebook/fb.resnet.torch). We plan to port the model in pytorch as well. Meanwhile, you can download the features as following:
 
@@ -103,7 +126,7 @@ wget https://data.lip6.fr/coco/testset.txt
 
 /!\ Notice that we've tried the features of [Resnet-152 pretrained with pytorch](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py) and got lower results.
 
-#### Pretrained models
+### Pretrained models
 
 We currently provide three models trained with our old Torch7 code and ported to Pytorch:
 
@@ -129,9 +152,9 @@ python train.py -e --path_opt options/vqa/mutan_att_trainval.yaml --resume ckpt
 
 To obtain test and testdev results, you will need to zip your result json file (name it as `results.zip`) and to submit it on the [evaluation server](https://competitions.codalab.org/competitions/6961).
 
-### Documentation
+## Documentation
 
-#### Architecture
+### Architecture
 
 ```
 .
@@ -150,10 +173,10 @@ To obtain test and testdev results, you will need to zip your result json file (
 ├── train.py       # train & eval models
 ├── eval_res.py    # eval results files with OpenEnded metric
 ├── extract.pt     # extract features from coco with CNNs
-└── visu.ipynb     # visualizing logs (under development)
+└── visu.py        # visualize logs and monitor training
 ```
 
-#### Options
+### Options
 
 There are three kind of options:
 
@@ -163,7 +186,7 @@ There are three kind of options:
 
 You can easly add new options in your custom yaml file if needed. Also, if you want to grid search a parameter, you can add an ArgumentParser option and modify the dictionnary in `train.py:L80`.
 
-#### Datasets
+### Datasets
 
 We currently provide three datasets:
 
@@ -177,7 +200,7 @@ We plan to add:
 - [VQA2](http://www.visualqa.org/)
 - [CLEVR](http://cs.stanford.edu/people/jcjohns/clevr/)
 
-#### Models
+### Models
 
 We currently provide four models:
 
@@ -188,9 +211,9 @@ We currently provide four models:
 
 We plan to add several other strategies in the futur.
 
-### Quick examples
+## Quick examples
 
-#### Extract features from COCO
+### Extract features from COCO
 
 The needed images will be automaticaly downloaded to `dir_data` and the features will be extracted with a resnet152 by default.
 
@@ -221,7 +244,7 @@ CUDA_VISIBLE_DEVICES=0 python extract.py
 CUDA_VISIBLE_DEVICES=1,2 python extract.py
 ```
 
-#### Train models on VQA
+### Train models on VQA
 
 Display help message, selected options and run default. The needed data will be automaticaly downloaded and processed using the options in `options/default.yaml`.
 
@@ -249,8 +272,35 @@ Run a MutanAtt model on the trainset and valset (by default) and run throw the t
 python train.py --vqa_trainsplit trainval --path_opt options/vqa/mutan_att.yaml
 ``` 
 
+### Monitor training
 
-#### Restart training
+Create a visualization of an experiment using `plotly` to monitor the training, just like the picture bellow (**click the image to access the html/js file**):
+
+<p align="center">
+    <a href="https://rawgit.com/Cadene/vqa.pytorch/master/doc/mutan_noatt.html">
+        <img src="https://raw.githubusercontent.com/Cadene/vqa.pytorch/master/doc/mutan_noatt.png" width="600"/>
+    </a>
+</p>
+
+Note that you have to wait until the first open ended accuracy has finished processing and then the html file will be created and will pop out on your default browser. The html will be refreshed every 60 seconds. However, you will currently need to press F5 on your browser to see the change.
+
+```
+python visu.py --dir_logs logs/vqa/mutan_noatt
+```
+
+Create a visualization of multiple experiments to compare them or monitor them like the picture bellow (**click the image to access the html/js file**):
+
+<p align="center">
+    <a href="https://rawgit.com/Cadene/vqa.pytorch/master/doc/mutan_noatt_vs_att.html">
+        <img src="https://raw.githubusercontent.com/Cadene/vqa.pytorch/master/doc/mutan_noatt_vs_att.png" width="600"/>
+    </a>
+</p>
+
+```
+python visu.py --dir_logs logs/vqa/mutan_noatt,logs/vqa/mutan_att
+```
+
+### Restart training
 
 Restart the model from the last checkpoint.
 
@@ -264,7 +314,7 @@ Restart the model from the best checkpoint.
 python train.py --path_opt options/vqa/mutan_noatt.yaml --dir_logs logs/vqa/mutan_noatt --resume best
 ```
 
-#### Evaluate models on VQA
+### Evaluate models on VQA
 
 Evaluate the model from the best checkpoint. If your model has been trained on the training set only (`vqa_trainsplit=train`), the model will be evaluate on the valset and will run throw the testset. If it was trained on the trainset + valset (`vqa_trainsplit=trainval`), it will not be evaluate on the valset.
 
