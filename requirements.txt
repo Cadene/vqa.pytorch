@@ -1,0 +1,6 @@
+numpy
+torch
+h5py
+pyyaml
+colorlover
+plotly
