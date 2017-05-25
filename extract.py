@@ -13,9 +13,10 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
 
-import vqa.lib.utils as utils
 import vqa.datasets.coco as coco
 from vqa.lib.dataloader import DataLoader
+from vqa.models.utils import ResNet
+from vqa.lib.logger import AvgMeter
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and name.startswith("resnet")
@@ -33,8 +34,8 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet152',
                         ' (default: resnet152)')
 parser.add_argument('--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 8)')
-parser.add_argument('--batch_size', default=10, type=int, metavar='N',
-                    help='mini-batch size (default: 10)')
+parser.add_argument('--batch_size', '-b', default=80, type=int, metavar='N',
+                    help='mini-batch size (default: 80)')
 parser.add_argument('--mode', default='both', type=str,
                     help='Options: att | noatt | (default) both')
 
@@ -44,7 +45,7 @@ def main():
 
     print("=> using pre-trained model '{}'".format(args.arch))
     model = models.__dict__[args.arch](pretrained=True)
-    model = ResNet(model)
+    model = ResNet(model, False)
     model = nn.DataParallel(model).cuda()
 
     #extract_name = 'arch,{}_layer,{}_resize,{}'.format()
@@ -54,7 +55,7 @@ def main():
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
-    dataset = coco.COCOImages(args.data_split, args.dir_data, 
+    dataset = coco.COCOImages(args.data_split, dict(dir=args.dir_data), 
         transform=transforms.Compose([
             transforms.Scale(448),
             transforms.CenterCrop(448),
@@ -90,15 +91,13 @@ def extract(data_loader, model, path_file, mode):
 
     model.eval()
 
-    batch_time = utils.AverageMeter()
-    data_time  = utils.AverageMeter()
+    batch_time = AvgMeter()
+    data_time  = AvgMeter()
     begin = time.time()
     end = time.time()
 
     idx = 0
-    image_names = []
     for i, input in enumerate(data_loader):
-        image_names.append(input['name'])
         input_var = torch.autograd.Variable(input['visual'], volatile=True)
         output_att = model(input_var)
 
@@ -124,34 +123,15 @@ def extract(data_loader, model, path_file, mode):
                    data_time=data_time,))
             
     hdf5_file.close()
+
+    # Saving image names in the same order than extraction
     with open(path_txt, 'w') as handle:
-        for name in image_names:
+        for name in data_loader.dataset.dataset.imgs:
             handle.write(name + '\n')
 
     end = time.time() - begin
     print('Finished in {}m and {}s'.format(int(end/60), int(end%60)))
 
-
-
-class ResNet(nn.Module):
-
-    def __init__(self, resnet):
-        super(ResNet, self).__init__()
-        self.resnet = resnet
-
-    def forward(self, x):
-        x = self.resnet.conv1(x)
-        x = self.resnet.bn1(x)
-        x = self.resnet.relu(x)
-        x = self.resnet.maxpool(x)
-        x = self.resnet.layer1(x)
-        x = self.resnet.layer2(x)
-        x = self.resnet.layer3(x)
-        x = self.resnet.layer4(x)
-        # x = self.avgpool(x)
-        # x = x.view(x.size(0), -1)
-        # x = self.fc(x)
-        return x
 
 if __name__ == '__main__':
     main()
