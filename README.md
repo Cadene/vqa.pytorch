@@ -31,6 +31,7 @@ If you have any questions about our code or model, don't hesitate to contact us 
     * [Monitor training](#monitor-training)
     * [Restart training](#restart-training)
     * [Evaluate models on VQA](#evaluate-models-on-vqa)
+* [Citation](#citation)
 * [Acknowledgment](#acknowledgment)
 
 ## Introduction
@@ -320,6 +321,22 @@ Evaluate the model from the best checkpoint. If your model has been trained on t
 
 ```
 python train.py --vqa_trainsplit train --path_opt options/vqa/mutan_att.yaml --dir_logs logs/vqa/mutan_att --resume best -e
+```
+
+## Citation
+
+Please cite the arXiv paper if you use Mutan in your work:
+
+```
+@article{benyounescadene2017mutan,
+  title={MUTAN: Multimodal Tucker Fusion for Visual Question Answering},
+  author={Hedi Ben-Younes and 
+          R{\'{e}}mi Cad{\`{e}}ne and
+          Nicolas Thome and
+          Matthieu Cord}},
+  journal={arXiv preprint arXiv:1705.06676},
+  year={2017}
+}
 ```
 
 ## Acknowledgment
