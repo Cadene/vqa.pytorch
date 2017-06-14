@@ -65,7 +65,7 @@ The VQA community developped an approach based on four learnable components:
     <img src="https://raw.githubusercontent.com/Cadene/vqa.pytorch/master/doc/mutan.png" width="400"/>
 </p>
 
-One of our claim is that the multimodal fusion between the image and the question representations is a critical component. Thus, our proposed model uses a Tucker Decomposition of the correlation Tensor to model reacher multimodal interactions in order to provide proper answers. Our best model is based on :
+One of our claim is that the multimodal fusion between the image and the question representations is a critical component. Thus, our proposed model uses a Tucker Decomposition of the correlation Tensor to model richer multimodal interactions in order to provide proper answers. Our best model is based on :
 
 - a pretrained Skipthoughts for the question model,
 - features from a pretrained Resnet-152 (with images of size 3x448x448) for the image model,
@@ -206,7 +206,7 @@ We plan to add:
 We currently provide four models:
 
 - MLBNoAtt: a strong baseline (BayesianGRU + Element-wise product)
-- [MLBAtt](https://arxiv.org/abs/1610.04325): the previous state-of-the-art which add an attention strategy
+- [MLBAtt](https://arxiv.org/abs/1610.04325): the previous state-of-the-art which adds an attention strategy
 - MutanNoAtt: our proof of concept (BayesianGRU + Mutan Fusion)
 - MutanAtt: the current state-of-the-art
 
