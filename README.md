@@ -271,7 +271,7 @@ python extract.py --dataset vgenome --dir_data data/vgenome --data_split train
 
 ### Train models on VQA 1.0
 
-Display help message, selected options and run default. The needed data will be automaticaly downloaded and processed using the options in `options/default.yaml`.
+Display help message, selected options and run default. The needed data will be automaticaly downloaded and processed using the options in `options/vqa/default.yaml`.
 
 ```
 python train.py -h
@@ -282,7 +282,7 @@ python train.py
 Run a MutanNoAtt model with default options.
 
 ```
-python train.py --path_opt options/vqa/mutan_noatt.yaml --dir_logs logs/vqa/mutan_noatt_train
+python train.py --path_opt options/vqa/mutan_noatt_train.yaml --dir_logs logs/vqa/mutan_noatt_train
 ```
 
 Run a MutanAtt model on the trainset and evaluate on the valset after each epoch.
