@@ -1,0 +1,49 @@
+logs:
+    dir_logs: logs/vqa2/mlb_att_trainval
+vqa:
+    dataset: VQA2
+    dir: data/vqa2
+    trainsplit: trainval
+    nans: 2000
+    maxlength: 26
+    minwcount: 0
+    nlp: mcb
+    pad: right
+    samplingans: True
+coco:
+    dir: data/coco
+    arch: fbresnet152
+    mode: att
+    size: 448
+model:
+    arch: MLBAtt
+    dim_v: 2048
+    dim_q: 2400
+    seq2vec:
+        arch: skipthoughts
+        dir_st: data/skip-thoughts
+        type: BayesianUniSkip
+        dropout: 0.25
+        fixed_emb: False
+    attention:
+        nb_glimpses: 4
+        dim_h: 1200
+        dropout_v: 0.5
+        dropout_q: 0.5
+        dropout_mm: 0.5
+        activation_v: tanh
+        activation_q: tanh
+        activation_mm: tanh
+    fusion:
+        dim_h: 1200
+        dropout_v: 0.5
+        dropout_q: 0.5
+        activation_v: tanh
+        activation_q: tanh
+    classif:
+        activation: tanh
+        dropout: 0.5
+optim:
+    lr: 0.0001
+    batch_size: 128
+    epochs: 100

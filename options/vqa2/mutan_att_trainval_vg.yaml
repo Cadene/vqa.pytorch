@@ -1,0 +1,68 @@
+logs:
+    dir_logs: logs/vqa2/mutan_att_trainval
+vqa:
+    dataset: VQA2
+    dir: data/vqa2
+    trainsplit: trainval
+    nans: 2000
+    maxlength: 26
+    minwcount: 0
+    nlp: mcb
+    pad: right
+    samplingans: True
+coco:
+    dir: data/coco
+    arch: fbresnet152torchported
+    mode: att
+    size: 448
+vgenome:
+    trainsplit: train
+    dir: data/vgenome
+    arch: fbresnet152
+    mode: att
+    size: 448
+    nans: 2000
+    maxlength: 26
+    minwcount: 0
+    nlp: mcb
+    pad: right
+model:
+    arch: MutanAtt
+    dim_v: 2048
+    dim_q: 2400
+    seq2vec:
+        arch: skipthoughts
+        dir_st: data/skip-thoughts
+        type: BayesianUniSkip
+        dropout: 0.25
+        fixed_emb: False
+    attention:
+        nb_glimpses: 2
+        dim_hv: 310
+        dim_hq: 310
+        dim_mm: 510
+        R: 5
+        dropout_v: 0.5
+        dropout_q: 0.5
+        dropout_mm: 0.5
+        activation_v: tanh
+        activation_q: tanh
+        dropout_hv: 0
+        dropout_hq: 0
+    fusion:
+        dim_hv: 620
+        dim_hq: 310
+        dim_mm: 510
+        R: 5
+        dropout_v: 0.5
+        dropout_q: 0.5
+        activation_v: tanh
+        activation_q: tanh
+        dropout_hv: 0
+        dropout_hq: 0
+    classif:
+        dropout: 0.5
+optim:
+    lr: 0.0001
+    batch_size: 128
+    epochs: 100

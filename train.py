@@ -17,10 +17,6 @@ import vqa.lib.criterions as criterions
 import vqa.datasets as datasets
 import vqa.models as models
 
-model_names = sorted(name for name in models.__dict__
-    if not name.startswith("__")
-    and callable(models.__dict__[name]))
-
 parser = argparse.ArgumentParser(
     description='Train/Evaluate models',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -35,13 +31,11 @@ parser.add_argument('--dir_logs', type=str, help='dir logs')
 # data options
 parser.add_argument('--vqa_trainsplit', type=str, choices=['train','trainval'])
 # model options
-parser.add_argument('--arch', choices=model_names,
+parser.add_argument('--arch', choices=models.model_names,
                     help='vqa model architecture: ' +
-                        ' | '.join(model_names))
+                        ' | '.join(models.model_names))
 parser.add_argument('--st_type',
                     help='skipthoughts type')
-parser.add_argument('--emb_drop', type=float,
-                    help='embedding dropout')
 parser.add_argument('--st_dropout', type=float)
 parser.add_argument('--st_fixed_emb', default=None, type=utils.str2bool,
                     help='backprop on embedding')
@@ -78,11 +72,13 @@ def main():
     global args, best_acc1
     args = parser.parse_args()
 
-    # Set options
+    #########################################################################################
+    # Create options
+    #########################################################################################
+
     options = {
         'vqa' : {
-            'trainsplit': args.vqa_trainsplit,
-            'dropout': args.emb_drop
+            'trainsplit': args.vqa_trainsplit
         },
         'logs': {
             'dir_logs': args.dir_logs
@@ -110,8 +106,18 @@ def main():
     if args.help_opt:
         return
 
-    # Set datasets
-    trainset = datasets.factory_VQA(options['vqa']['trainsplit'], options['vqa'], options['coco'])
+    # Set datasets options
+    if 'vgenome' not in options:
+        options['vgenome'] = None
+
+    #########################################################################################
+    # Create needed datasets
+    #########################################################################################
+
+    trainset = datasets.factory_VQA(options['vqa']['trainsplit'],
+                                    options['vqa'],
+                                    options['coco'],
+                                    options['vgenome'])
     train_loader = trainset.data_loader(batch_size=options['optim']['batch_size'],
                                         num_workers=args.workers,
                                         shuffle=True)                                      
@@ -120,22 +126,27 @@ def main():
         valset = datasets.factory_VQA('val', options['vqa'], options['coco'])
         val_loader = valset.data_loader(batch_size=options['optim']['batch_size'],
                                         num_workers=args.workers)
+
     if options['vqa']['trainsplit'] == 'trainval' or args.evaluate:
         testset = datasets.factory_VQA('test', options['vqa'], options['coco'])
         test_loader = testset.data_loader(batch_size=options['optim']['batch_size'],
                                           num_workers=args.workers)
     
-    # Set model, criterion and optimizer
-    model = getattr(models, options['model']['arch'])(
-        options['model'], trainset.vocab_words(), trainset.vocab_answers())
-
-    model = nn.DataParallel(model).cuda()
-    criterion = criterions.factory_loss(options['vqa'], cuda=True)
-    #optimizer = torch.optim.Adam([model.module.seq2vec.rnn.gru_cell.parameters()], options['optim']['lr'])
-    #optimizer = torch.optim.Adam(model.parameters(), options['optim']['lr'])
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), options['optim']['lr'])
+    #########################################################################################
+    # Create model, criterion and optimizer
+    #########################################################################################
     
-    # Optionally resume from a checkpoint
+    model = models.factory(options['model'],
+                           trainset.vocab_words(), trainset.vocab_answers(),
+                           cuda=True, data_parallel=True)
+    criterion = criterions.factory(options['vqa'], cuda=True)
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
+                            options['optim']['lr'])
+    
+    #########################################################################################
+    # args.resume: resume from a checkpoint OR create logs directory
+    #########################################################################################
+
     exp_logger = None
     if args.resume:
         args.start_epoch, best_acc1, exp_logger = load_checkpoint(model.module, optimizer,
@@ -168,13 +179,16 @@ def main():
         exp_logger.info['model_params'] = utils.params_count(model)
         print('Model has {} parameters'.format(exp_logger.info['model_params']))
 
-    # Begin evaluation and training
+    #########################################################################################
+    # args.evaluate: on valset OR/AND on testset
+    #########################################################################################
+
     if args.evaluate:
         path_logger_json = os.path.join(options['logs']['dir_logs'], 'logger.json')
 
         if options['vqa']['trainsplit'] == 'train':
             acc1, val_results = engine.validate(val_loader, model, criterion,
-                                                 exp_logger, args.start_epoch, args.print_freq)
+                                                exp_logger, args.start_epoch, args.print_freq)
             # save results and compute OpenEnd accuracy
             exp_logger.to_json(path_logger_json)
             save_results(val_results, args.start_epoch, valset.split_name(),
@@ -189,6 +203,10 @@ def main():
         save_results(testdev_results, args.start_epoch, testset.split_name(testdev=True),
                      options['logs']['dir_logs'], options['vqa']['dir'])
         return
+
+    #########################################################################################
+    # Begin training on train/val or trainval/test
+    #########################################################################################
 
     for epoch in range(args.start_epoch+1, options['optim']['epochs']):
         #adjust_learning_rate(optimizer, epoch)

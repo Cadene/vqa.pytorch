@@ -8,60 +8,73 @@ import torch
 import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
+from torch.autograd import Variable
 
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-import torchvision.models as models
 
-import vqa.datasets.coco as coco
+import vqa.models.convnets as convnets
+import vqa.datasets as datasets
 from vqa.lib.dataloader import DataLoader
-from vqa.models.utils import ResNet
 from vqa.lib.logger import AvgMeter
 
-model_names = sorted(name for name in models.__dict__
-    if name.islower() and name.startswith("resnet")
-    and callable(models.__dict__[name]))
-
 parser = argparse.ArgumentParser(description='Extract')
-parser.add_argument('--dir_data', default='data/coco', metavar='DIR',
-                    help='dir dataset: mscoco or visualgenome')
+parser.add_argument('--dataset', default='coco',
+                    choices=['coco', 'vgenome'],
+                    help='dataset type: coco (default) | vgenome')
+parser.add_argument('--dir_data', default='data/coco',
+                    help='dir dataset to download or/and load images')
 parser.add_argument('--data_split', default='train', type=str,
                     help='Options: (default) train | val | test')
-parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet152',
-                    choices=model_names,
+parser.add_argument('--arch', '-a', default='resnet152',
+                    choices=convnets.model_names,
                     help='model architecture: ' +
-                        ' | '.join(model_names) +
-                        ' (default: resnet152)')
-parser.add_argument('--workers', default=4, type=int, metavar='N',
-                    help='number of data loading workers (default: 8)')
-parser.add_argument('--batch_size', '-b', default=80, type=int, metavar='N',
+                        ' | '.join(convnets.model_names) +
+                        ' (default: fbresnet152)')
+parser.add_argument('--workers', default=4, type=int, 
+                    help='number of data loading workers (default: 4)')
+parser.add_argument('--batch_size', '-b', default=80, type=int, 
                     help='mini-batch size (default: 80)')
 parser.add_argument('--mode', default='both', type=str,
                     help='Options: att | noatt | (default) both')
+parser.add_argument('--size', default=448, type=int,
+                    help='Image size (448 for noatt := avg pooling to get 224) (default:448)')
 
 
 def main():
+    global args
     args = parser.parse_args()
 
     print("=> using pre-trained model '{}'".format(args.arch))
-    model = models.__dict__[args.arch](pretrained=True)
-    model = ResNet(model, False)
-    model = nn.DataParallel(model).cuda()
+    model = convnets.factory({'arch':args.arch}, cuda=True, data_parallel=True)
 
-    #extract_name = 'arch,{}_layer,{}_resize,{}'.format()
-    extract_name = 'arch,{}'.format(args.arch)
+    extract_name = 'arch,{}_size,{}'.format(args.arch, args.size)
 
-    #dir_raw = os.path.join(args.dir_data, 'raw')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
-    dataset = coco.COCOImages(args.data_split, dict(dir=args.dir_data), 
-        transform=transforms.Compose([
-            transforms.Scale(448),
-            transforms.CenterCrop(448),
-            transforms.ToTensor(),
-            normalize,
-        ]))
+    if args.dataset == 'coco':
+        if 'coco' not in args.dir_data:
+            raise ValueError('"coco" string not in dir_data')
+        dataset = datasets.COCOImages(args.data_split, dict(dir=args.dir_data), 
+            transform=transforms.Compose([
+                transforms.Scale(args.size),
+                transforms.CenterCrop(args.size),
+                transforms.ToTensor(),
+                normalize,
+            ]))
+    elif args.dataset == 'vgenome':
+        if args.data_split != 'train':
+            raise ValueError('train split is required for vgenome')
+        if 'vgenome' not in args.dir_data:
+            raise ValueError('"vgenome" string not in dir_data')
+        dataset = datasets.VisualGenomeImages(args.data_split, dict(dir=args.dir_data), 
+            transform=transforms.Compose([
+                transforms.Scale(args.size),
+                transforms.CenterCrop(args.size),
+                transforms.ToTensor(),
+                normalize,
+            ]))
 
     data_loader = DataLoader(dataset,
         batch_size=args.batch_size, shuffle=False,
@@ -79,13 +92,19 @@ def extract(data_loader, model, path_file, mode):
     path_txt = path_file + '.txt'
     hdf5_file = h5py.File(path_hdf5, 'w')
 
+    # estimate output shapes
+    output = model(Variable(torch.ones(1, 3, args.size, args.size),
+                            volatile=True))
+
     nb_images = len(data_loader.dataset)
     if mode == 'both' or mode == 'att':
-        shape_att = (nb_images, 2048, 14, 14)
+        shape_att = (nb_images, output.size(1), output.size(2), output.size(3))
+        print('Warning: shape_att={}'.format(shape_att))
         hdf5_att = hdf5_file.create_dataset('att', shape_att,
                                             dtype='f')#, compression='gzip')
     if mode == 'both' or mode == 'noatt':
-        shape_noatt = (nb_images, 2048)
+        shape_noatt = (nb_images, output.size(1))
+        print('Warning: shape_noatt={}'.format(shape_noatt))
         hdf5_noatt = hdf5_file.create_dataset('noatt', shape_noatt,
                                               dtype='f')#, compression='gzip')
 
@@ -98,7 +117,7 @@ def extract(data_loader, model, path_file, mode):
 
     idx = 0
     for i, input in enumerate(data_loader):
-        input_var = torch.autograd.Variable(input['visual'], volatile=True)
+        input_var = Variable(input['visual'], volatile=True)
         output_att = model(input_var)
 
         nb_regions = output_att.size(2) * output_att.size(3)
@@ -111,6 +130,7 @@ def extract(data_loader, model, path_file, mode):
             hdf5_noatt[idx:idx+batch_size] = output_noatt.data.cpu().numpy()
         idx += batch_size
 
+        torch.cuda.synchronize()
         batch_time.update(time.time() - end)
         end = time.time()
 

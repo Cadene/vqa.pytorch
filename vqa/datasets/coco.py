@@ -88,10 +88,10 @@ def default_transform(size):
     ])
     return transform
 
-def factory_COCO(data_split, opt, transform=None):
+def factory(data_split, opt, transform=None):
     if data_split == 'trainval':
-        trainset = factory_COCO('train', opt, transform)
-        valset = factory_COCO('val', opt, transform)
+        trainset = factory('train', opt, transform)
+        valset = factory('val', opt, transform)
         return COCOTrainval(trainset, valset)
     elif data_split in ['train', 'val', 'test']:
         if opt['mode'] == 'img':

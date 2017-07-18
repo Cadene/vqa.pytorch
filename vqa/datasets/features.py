@@ -12,10 +12,12 @@ class FeaturesDataset(data.Dataset):
         self.dir_extract = os.path.join(self.opt['dir'],
                                       'extract',
                                       'arch,' + self.opt['arch'])
+        if 'size' in opt:
+            self.dir_extract += '_size,' + str(opt['size'])
         self.path_hdf5 = os.path.join(self.dir_extract,
                                       data_split + 'set.hdf5')
         assert os.path.isfile(self.path_hdf5), \
-               'you must extract the features first with extract.py'
+               'File not found in {}, you must extract the features first with extract.py'.format(self.path_hdf5)
         self.hdf5_file = h5py.File(self.path_hdf5, 'r')#, driver='mpio', comm=MPI.COMM_WORLD)
         self.dataset_features = self.hdf5_file[self.opt['mode']]
         self.index_to_name, self.name_to_index = self._load_dicts()

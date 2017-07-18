@@ -1,4 +1,5 @@
 import sys
+import copy
 import torch
 import torch.nn as nn
 import torchvision.models as models
@@ -6,43 +7,23 @@ import torchvision.models as models
 from .noatt import MLBNoAtt, MutanNoAtt
 from .att import MLBAtt, MutanAtt
 
-class ResNet(nn.Module):
+model_names = sorted(name for name in sys.modules[__name__].__dict__
+    if not name.startswith("__"))# and 'Att' in name)
 
-    def __init__(self, resnet, pooling, fix_until=None):
-        # pooling: boolean
-        # fix_until: None or layer name (included)
-        super(ResNet, self).__init__()
-        self.resnet = resnet
-        self.pooling = pooling
-        if fix_until is not None:
-            self.fixable_layers = [
-                'conv1', 'bn1', 'relu', 'maxpool',
-                'layer1', 'layer2', 'layer3', 'layer4']
-            if fix_until in self.fixable_layers:
-                self.fix_until = fix_until
-                self._fix_layers(fix_until)
-            else:
-                raise ValueError
+def factory(opt, vocab_words, vocab_answers, cuda=True, data_parallel=True):
+    opt = copy.copy(opt)
 
-    def _fix_layers(self, fix_until):
-        for layer in self.fixable_layers:
-            print('Warning models/utils.py: Fix cnn layer '+layer)
-            for p in getattr(self.resnet, layer).parameters():
-                p.requires_grad = False
-            if layer == self.fix_until:
-                break
+    if opt['arch'] in model_names:
+        model = getattr(sys.modules[__name__], opt['arch'])(opt, vocab_words, vocab_answers)
+    else:
+        raise ValueError
 
-    def forward(self, x):
-        x = self.resnet.conv1(x)
-        x = self.resnet.bn1(x)
-        x = self.resnet.relu(x)
-        x = self.resnet.maxpool(x)
-        x = self.resnet.layer1(x)
-        x = self.resnet.layer2(x)
-        x = self.resnet.layer3(x)
-        x = self.resnet.layer4(x)
-        if self.pooling:
-            x = self.resnet.avgpool(x)
-            x = x.view(x.size(0), -1)
-        # x = self.fc(x)
-        return x
+    if data_parallel:
+        model = nn.DataParallel(model).cuda()
+        if not cuda:
+            raise ValueError
+
+    if cuda:
+        model.cuda()
+
+    return model

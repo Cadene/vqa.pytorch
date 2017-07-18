@@ -97,7 +97,7 @@ def validate(loader, model, criterion, logger, epoch=0, print_freq=10):
         end = time.time()
 
         if i % print_freq == 0:
-            print('Test: [{0}/{1}]\t'
+            print('Val: [{0}/{1}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                   'Acc@1 {acc1.val:.3f} ({acc1.avg:.3f})\t'

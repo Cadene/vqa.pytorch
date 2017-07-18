@@ -1,12 +1,19 @@
 # Visual Question Answering in pytorch
 
-This repo was made by [Remi Cadene](http://remicadene.com) (LIP6) and [Hedi Ben-Younes](https://twitter.com/labegne) (LIP6-Heuritech), two PhD Students working on VQA at [UPMC-LIP6](http://lip6.fr) and their professors [Matthieu Cord](http://webia.lip6.fr/~cord) (LIP6) and [Nicolas Thome](http://webia.lip6.fr/~thomen) (LIP6-CNAM). We developped this code in the frame of a research paper called [MUTAN: Multimodal Tucker Fusion for VQA](https://arxiv.org/abs/1705.06676) which is (as far as we know) the current state-of-the-art on the [VQA-1 dataset](http://visualqa.org).
+This repo was made by [Remi Cadene](http://remicadene.com) (LIP6) and [Hedi Ben-Younes](https://twitter.com/labegne) (LIP6-Heuritech), two PhD Students working on VQA at [UPMC-LIP6](http://lip6.fr) and their professors [Matthieu Cord](http://webia.lip6.fr/~cord) (LIP6) and [Nicolas Thome](http://webia.lip6.fr/~thomen) (LIP6-CNAM). We developped this code in the frame of a research paper called [MUTAN: Multimodal Tucker Fusion for VQA](https://arxiv.org/abs/1705.06676) which is (as far as we know) the current state-of-the-art on the [VQA 1.0 dataset](http://visualqa.org).
 
 The goal of this repo is two folds:
 - to make it easier to reproduce our results,
 - to provide an efficient and modular code base to the community for further research on other VQA datasets.
 
 If you have any questions about our code or model, don't hesitate to contact us or to submit any issues. Pull request are welcome!
+
+#### News:
+
+- coming soon: pretrained models on VQA2, features of FBResnet152, web app demo
+- 18th july 2017: VQA2, VisualGenome, FBResnet152 (for pytorch) added
+- 16th july 2017: paper accepted at ICCV2017
+- 30th may 2017: poster accepted at CVPR2017 (VQA Workshop)
 
 #### Summary:
 
@@ -27,7 +34,10 @@ If you have any questions about our code or model, don't hesitate to contact us 
     * [Models](#models)
 * [Quick examples](#quick-examples)
     * [Extract features from COCO](#extract-features-from-coco)
-    * [Train models on VQA](#train-models-on-vqa)
+    * [Extract features from VisualGenome](#extract-features-from-visualgenome)
+    * [Train models on VQA 1.0](#train-models-on-vqa-1-0)
+    * [Train models on VQA 2.0](#train-models-on-vqa-2-0)
+    * [Train models on VQA + VisualGenome](#train-models-on-vqa-2-0)
     * [Monitor training](#monitor-training)
     * [Restart training](#restart-training)
     * [Evaluate models on VQA](#evaluate-models-on-vqa)
@@ -108,7 +118,7 @@ Our code has two external dependencies:
 Data will be automaticaly downloaded and preprocessed when needed. Links to data are stored in `vqa/datasets/vqa.py` and `vqa/datasets/coco.py`.
 
 
-## Reproducing results
+## Reproducing results on VQA 1.0
 
 ### Features
 
@@ -173,7 +183,7 @@ To obtain test and testdev results, you will need to zip your result json file (
 |
 ├── train.py       # train & eval models
 ├── eval_res.py    # eval results files with OpenEnded metric
-├── extract.pt     # extract features from coco with CNNs
+├── extract.py     # extract features from coco with CNNs
 └── visu.py        # visualize logs and monitor training
 ```
 
@@ -189,16 +199,15 @@ You can easly add new options in your custom yaml file if needed. Also, if you w
 
 ### Datasets
 
-We currently provide three datasets:
+We currently provide four datasets:
 
 - [COCOImages](http://mscoco.org/) currently used to extract features, it comes with three datasets: trainset, valset and testset
-- COCOFeatures used by any VQA datasets
-- [VQA](http://www.visualqa.org/vqa_v1_download.html) comes with four datasets: trainset, valset, testset (including test-std and test-dev) and "trainvalset" (concatenation of trainset and valset)
+- [VisualGenomeImages]() currently used to extract features, it comes with one split: trainset
+- [VQA 1.0](http://www.visualqa.org/vqa_v1_download.html) comes with four datasets: trainset, valset, testset (including test-std and test-dev) and "trainvalset" (concatenation of trainset and valset)
+- [VQA 2.0](http://www.visualqa.org) same but twice bigger (however same images than VQA 1.0)
 
 We plan to add:
 
-- [VisualGenome](http://visualgenome.org/)
-- [VQA2](http://www.visualqa.org/)
 - [CLEVR](http://cs.stanford.edu/people/jcjohns/clevr/)
 
 ### Models
@@ -245,7 +254,16 @@ CUDA_VISIBLE_DEVICES=0 python extract.py
 CUDA_VISIBLE_DEVICES=1,2 python extract.py
 ```
 
-### Train models on VQA
+### Extract features from VisualGenome
+
+Same here, but only train is available:
+
+```
+python extract.py --dataset vgenome --dir_data data/vgenome --data_split train
+```
+
+
+### Train models on VQA 1.0
 
 Display help message, selected options and run default. The needed data will be automaticaly downloaded and processed using the options in `options/default.yaml`.
 
@@ -258,19 +276,19 @@ python train.py
 Run a MutanNoAtt model with default options.
 
 ```
-python train.py --path_opt options/vqa/mutan_noatt.yaml --dir_logs logs/vqa/mutan_noatt
+python train.py --path_opt options/vqa/mutan_noatt.yaml --dir_logs logs/vqa/mutan_noatt_train
 ```
 
 Run a MutanAtt model on the trainset and evaluate on the valset after each epoch.
 
 ```
-python train.py --vqa_trainsplit train --path_opt options/vqa/mutan_att.yaml 
+python train.py --vqa_trainsplit train --path_opt options/vqa/mutan_att_trainval.yaml 
 ``` 
 
 Run a MutanAtt model on the trainset and valset (by default) and run throw the testset after each epoch (produce a results file that you can submit to the evaluation server).
 
 ```
-python train.py --vqa_trainsplit trainval --path_opt options/vqa/mutan_att.yaml
+python train.py --vqa_trainsplit trainval --path_opt options/vqa/mutan_att_trainval.yaml
 ``` 
 
 ### Monitor training
@@ -301,6 +319,22 @@ Create a visualization of multiple experiments to compare them or monitor them l
 python visu.py --dir_logs logs/vqa/mutan_noatt,logs/vqa/mutan_att
 ```
 
+### Train models on VQA 2.0
+
+See options of [vqa2/mutan_att_trainval](https://github.com/Cadene/vqa.pytorch/blob/master/options/vqa2/mutan_att_trainval.yaml):
+
+```
+python train.py --path_opt options/vqa2/mutan_att_trainval.yaml
+``` 
+
+### Train models on VQA (1.0 or 2.0) + VisualGenome
+
+See options of [vqa2/mutan_att_trainval_vg](https://github.com/Cadene/vqa.pytorch/blob/master/options/vqa2/mutan_att_trainval_vg.yaml):
+
+```
+python train.py --path_opt options/vqa2/mutan_att_trainval_vg.yaml
+``` 
+
 ### Restart training
 
 Restart the model from the last checkpoint.
@@ -329,13 +363,14 @@ Please cite the arXiv paper if you use Mutan in your work:
 
 ```
 @article{benyounescadene2017mutan,
-  title={MUTAN: Multimodal Tucker Fusion for Visual Question Answering},
-  author={Hedi Ben-Younes and 
-          R{\'{e}}mi Cad{\`{e}}ne and
-          Nicolas Thome and
-          Matthieu Cord}},
-  journal={arXiv preprint arXiv:1705.06676},
-  year={2017}
+author = {Hedi Ben-Younes and 
+R{\'{e}}mi Cad{\`{e}}ne and
+Nicolas Thome and
+Matthieu Cord},
+title = {MUTAN: Multimodal Tucker Fusion for Visual Question Answering},
+journal = {ICCV},
+year = {2017},
+url = {http://arxiv.org/abs/1705.06676}
 }
 ```
 
