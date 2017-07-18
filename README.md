@@ -24,7 +24,7 @@ If you have any questions about our code or model, don't hesitate to contact us 
     * [Requirements](#requirements)
     * [Submodules](#submodules)
     * [Data](#data)
-* [Reproducing results](#reproducing-results)
+* [Reproducing results on VQA 1.0](#reproducing-results-on-vqa-10)
     * [Features](#features)
     * [Pretrained models](#pretrained-models)
 * [Documentation](#documentation)
@@ -35,9 +35,9 @@ If you have any questions about our code or model, don't hesitate to contact us 
 * [Quick examples](#quick-examples)
     * [Extract features from COCO](#extract-features-from-coco)
     * [Extract features from VisualGenome](#extract-features-from-visualgenome)
-    * [Train models on VQA 1.0](#train-models-on-vqa-1-0)
-    * [Train models on VQA 2.0](#train-models-on-vqa-2-0)
-    * [Train models on VQA + VisualGenome](#train-models-on-vqa-2-0)
+    * [Train models on VQA 1.0](#train-models-on-vqa-10)
+    * [Train models on VQA 2.0](#train-models-on-vqa-20)
+    * [Train models on VQA + VisualGenome](#train-models-on-vqa-10-or-20--visualgenome)
     * [Monitor training](#monitor-training)
     * [Restart training](#restart-training)
     * [Evaluate models on VQA](#evaluate-models-on-vqa)
@@ -67,7 +67,7 @@ The VQA task is still on active research. However, when it will be solved, it co
 The VQA community developped an approach based on four learnable components:
 
 - a question model which can be a LSTM, GRU, or pretrained Skipthoughts,
-- an image model which can be a pretrained VGG16 or Resnet-152,
+- an image model which can be a pretrained VGG16 or ResNet-152,
 - a fusion scheme which can be an element-wise sum, concatenation, [MCB](https://arxiv.org/abs/1606.01847), [MLB](https://arxiv.org/abs/1610.04325), or [Mutan](https://arxiv.org/abs/1705.06676),
 - optionally, an attention scheme which may have several "glimpses".
 
@@ -122,7 +122,7 @@ Data will be automaticaly downloaded and preprocessed when needed. Links to data
 
 ### Features
 
-As we first developped on Lua/Torch7, we used the features of [Resnet-152 pretrained with Torch7](https://github.com/facebook/fb.resnet.torch). We plan to port the model in pytorch as well. Meanwhile, you can download the features as following:
+As we first developped on Lua/Torch7, we used the features of [ResNet-152 pretrained with Torch7](https://github.com/facebook/fb.resnet.torch). We plan to port the model in pytorch as well. Meanwhile, you can download the features as following:
 
 ```
 mkdir -p data/coco/extract/arch,fbresnet152torch
@@ -135,7 +135,7 @@ wget https://data.lip6.fr/coco/testset.hdf5
 wget https://data.lip6.fr/coco/testset.txt
 ```
 
-/!\ Notice that we've tried the features of [Resnet-152 pretrained with pytorch](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py) and got lower results.
+/!\ Notice that we've tried the features of [ResNet-152 pretrained with pytorch](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py) and got lower results.
 
 ### Pretrained models
 
@@ -174,10 +174,11 @@ To obtain test and testdev results, you will need to zip your result json file (
 ├── data           # datasets directories
 |   ├── coco       # images and features
 |   ├── vqa        # raw, interim and processed data
+|   ├── vgenome    # raw, interim, processed data + images and features
 |   └── ...
 ├── vqa            # vqa package dir
-|   ├── datasets   # datasets classes & functions dir (vqa, coco, images, features, etc.)
-|   ├── external   # submodules dir (VQA, skip-thoughts.torch)
+|   ├── datasets   # datasets classes & functions dir (vqa, coco, vgenome, images, features, etc.)
+|   ├── external   # submodules dir (VQA, skip-thoughts.torch, pretrained-models.pytorch)
 |   ├── lib        # misc classes & func dir (engine, logger, dataloader, etc.)
 |   └── models     # models classes & func dir (att, fusion, notatt, seq2vec)
 |
@@ -291,6 +292,22 @@ Run a MutanAtt model on the trainset and valset (by default) and run throw the t
 python train.py --vqa_trainsplit trainval --path_opt options/vqa/mutan_att_trainval.yaml
 ``` 
 
+### Train models on VQA 2.0
+
+See options of [vqa2/mutan_att_trainval](https://github.com/Cadene/vqa.pytorch/blob/master/options/vqa2/mutan_att_trainval.yaml):
+
+```
+python train.py --path_opt options/vqa2/mutan_att_trainval.yaml
+``` 
+
+### Train models on VQA (1.0 or 2.0) + VisualGenome
+
+See options of [vqa2/mutan_att_trainval_vg](https://github.com/Cadene/vqa.pytorch/blob/master/options/vqa2/mutan_att_trainval_vg.yaml):
+
+```
+python train.py --path_opt options/vqa2/mutan_att_trainval_vg.yaml
+``` 
+
 ### Monitor training
 
 Create a visualization of an experiment using `plotly` to monitor the training, just like the picture bellow (**click the image to access the html/js file**):
@@ -319,21 +336,7 @@ Create a visualization of multiple experiments to compare them or monitor them l
 python visu.py --dir_logs logs/vqa/mutan_noatt,logs/vqa/mutan_att
 ```
 
-### Train models on VQA 2.0
 
-See options of [vqa2/mutan_att_trainval](https://github.com/Cadene/vqa.pytorch/blob/master/options/vqa2/mutan_att_trainval.yaml):
-
-```
-python train.py --path_opt options/vqa2/mutan_att_trainval.yaml
-``` 
-
-### Train models on VQA (1.0 or 2.0) + VisualGenome
-
-See options of [vqa2/mutan_att_trainval_vg](https://github.com/Cadene/vqa.pytorch/blob/master/options/vqa2/mutan_att_trainval_vg.yaml):
-
-```
-python train.py --path_opt options/vqa2/mutan_att_trainval_vg.yaml
-``` 
 
 ### Restart training
 
