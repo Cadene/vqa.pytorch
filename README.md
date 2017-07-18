@@ -111,18 +111,19 @@ pip install -r requirements.txt
 Our code has two external dependencies:
 
 - [VQA](https://github.com/Cadene/VQA) is used to evaluate results files on the valset with the OpendEnded accuracy,
-- [skip-thoughts.torch](https://github.com/Cadene/skip-thoughts.torch) is used to import pretrained GRUs and embeddings.
+- [skip-thoughts.torch](https://github.com/Cadene/skip-thoughts.torch) is used to import pretrained GRUs and embeddings,
+- [pretrained-models.pytorch](https://github.com/Cadene/pretrained-models.pytorch) is used to load pretrained convnets.
 
 ### Data
 
-Data will be automaticaly downloaded and preprocessed when needed. Links to data are stored in `vqa/datasets/vqa.py` and `vqa/datasets/coco.py`.
+Data will be automaticaly downloaded and preprocessed when needed. Links to data are stored in `vqa/datasets/vqa.py`, `vqa/datasets/coco.py` and `vqa/datasets/vgenome.py`.
 
 
 ## Reproducing results on VQA 1.0
 
 ### Features
 
-As we first developped on Lua/Torch7, we used the features of [ResNet-152 pretrained with Torch7](https://github.com/facebook/fb.resnet.torch). We plan to port the model in pytorch as well. Meanwhile, you can download the features as following:
+As we first developped on Lua/Torch7, we used the features of [ResNet-152 pretrained with Torch7](https://github.com/facebook/fb.resnet.torch). We ported the pretrained resnet152 trained with Torch7 in pytorch in the v2.0 release. We will provide all the extracted features soon. Meanwhile, you can download the coco features as following:
 
 ```
 mkdir -p data/coco/extract/arch,fbresnet152torch
@@ -135,15 +136,19 @@ wget https://data.lip6.fr/coco/testset.hdf5
 wget https://data.lip6.fr/coco/testset.txt
 ```
 
-/!\ Notice that we've tried the features of [ResNet-152 pretrained with pytorch](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py) and got lower results.
+/!\ There are currently 3 versions of ResNet152:
 
-### Pretrained models
+- fbresnet152torch which is the torch7 model,
+- fbresnet152 which is the porting of the torch7 in pytorch,
+- [resnet152](https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py) which is the pretrained model from torchvision (we've got lower results with it).
+
+### Pretrained VQA models
 
 We currently provide three models trained with our old Torch7 code and ported to Pytorch:
 
-- MutanNoAtt trained on the VQA-1 trainset,
-- MLBAtt trained on the VQA-1 trainvalset and VisualGenome,
-- MutanAtt trained on the VQA-1 trainvalset and VisualGenome.
+- MutanNoAtt trained on the VQA 1.0 trainset,
+- MLBAtt trained on the VQA 1.0 trainvalset and VisualGenome,
+- MutanAtt trained on the VQA 1.0 trainvalset and VisualGenome.
 
 ```
 mkdir -p logs/vqa
@@ -161,7 +166,7 @@ python train.py -e --path_opt options/vqa/mlb_noatt_trainval.yaml --resume ckpt
 python train.py -e --path_opt options/vqa/mutan_att_trainval.yaml --resume ckpt
 ```
 
-To obtain test and testdev results, you will need to zip your result json file (name it as `results.zip`) and to submit it on the [evaluation server](https://competitions.codalab.org/competitions/6961).
+To obtain test and testdev results on VQA 1.0, you will need to zip your result json file (name it as `results.zip`) and to submit it on the [evaluation server](https://competitions.codalab.org/competitions/6961).
 
 ## Documentation
 
@@ -180,7 +185,7 @@ To obtain test and testdev results, you will need to zip your result json file (
 |   ├── datasets   # datasets classes & functions dir (vqa, coco, vgenome, images, features, etc.)
 |   ├── external   # submodules dir (VQA, skip-thoughts.torch, pretrained-models.pytorch)
 |   ├── lib        # misc classes & func dir (engine, logger, dataloader, etc.)
-|   └── models     # models classes & func dir (att, fusion, notatt, seq2vec)
+|   └── models     # models classes & func dir (att, fusion, notatt, seq2vec, convnets)
 |
 ├── train.py       # train & eval models
 ├── eval_res.py    # eval results files with OpenEnded metric
@@ -366,14 +371,14 @@ Please cite the arXiv paper if you use Mutan in your work:
 
 ```
 @article{benyounescadene2017mutan,
-author = {Hedi Ben-Younes and 
-R{\'{e}}mi Cad{\`{e}}ne and
-Nicolas Thome and
-Matthieu Cord},
-title = {MUTAN: Multimodal Tucker Fusion for Visual Question Answering},
-journal = {ICCV},
-year = {2017},
-url = {http://arxiv.org/abs/1705.06676}
+  author = {Hedi Ben-Younes and 
+    R{\'{e}}mi Cad{\`{e}}ne and
+    Nicolas Thome and
+    Matthieu Cord},
+  title = {MUTAN: Multimodal Tucker Fusion for Visual Question Answering},
+  journal = {ICCV},
+  year = {2017},
+  url = {http://arxiv.org/abs/1705.06676}
 }
 ```
 
