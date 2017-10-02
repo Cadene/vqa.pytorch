@@ -21,8 +21,8 @@ def split_name(data_split):
 class COCOImages(AbstractImagesDataset):
 
     def __init__(self, data_split, opt, transform=None, loader=default_loader):
+        self.split_name = split_name(data_split)
         super(COCOImages, self).__init__(data_split, opt, transform, loader)
-        self.split_name = split_name(self.data_split)
         self.dir_split = os.path.join(self.dir_raw, self.split_name)
         self.dataset = ImagesFolder(self.dir_split, transform=self.transform, loader=self.loader)
         self.name_to_index = self._load_name_to_index()
