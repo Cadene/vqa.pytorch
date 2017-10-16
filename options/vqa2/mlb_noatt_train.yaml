@@ -1,5 +1,5 @@
 logs:
-    dir_logs: logs/vqa2/default
+    dir_logs: logs/vqa2/mlb_noatt_train
 vqa:
     dataset: VQA2
     dir: data/vqa2
