@@ -38,7 +38,7 @@ class ImagesFolder(data.Dataset):
 
     def __getitem__(self, index):
         item = {}
-        item['name'] = self.imgs[index] 
+        item['name'] = self.imgs[index]
         item['path'] = os.path.join(self.root, item['name'])
         if self.loader is not None:
             item['visual']  = self.loader(item['path'])
@@ -57,10 +57,13 @@ class AbstractImagesDataset(data.Dataset):
         self.opt = opt
         self.transform = transform
         self.loader = loader
-
         self.dir_raw = os.path.join(self.opt['dir'], 'raw')
-        if not os.path.exists(self.dir_raw):
+
+        if not os.path.exists(self.get_dir_data()):
             self._raw()
+
+    def get_dir_data(self):
+        return self.dir_raw
 
     def get_by_name(self, image_name):
         index = self.name_to_index[image_name]
