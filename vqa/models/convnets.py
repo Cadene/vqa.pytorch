@@ -2,7 +2,6 @@ import copy
 import torch
 import torch.nn as nn
 import torchvision.models as pytorch_models
-
 import sys
 sys.path.append('vqa/external/pretrained-models.pytorch')
 import pretrainedmodels as torch7_models
@@ -21,7 +20,21 @@ model_names = pytorch_resnet_names + torch7_resnet_names
 def factory(opt, cuda=True, data_parallel=True):
     opt = copy.copy(opt)
 
-    # forward_* will be better handle in futur release
+    class WrapperModule(nn.Module):
+        def __init__(self, net, forward_fn):
+            super(WrapperModule, self).__init__()
+            self.net = net
+            self.forward_fn = forward_fn
+
+        def forward(self, x):
+            return self.forward_fn(self.net, x)
+
+        def __getattr__(self, attr):
+            try:
+                return super(WrapperModule, self).__getattr__(attr)
+            except AttributeError:
+                return getattr(self.net, attr)
+
     def forward_resnet(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
@@ -58,26 +71,23 @@ def factory(opt, cuda=True, data_parallel=True):
     if opt['arch'] in pytorch_resnet_names:
         model = pytorch_models.__dict__[opt['arch']](pretrained=True)
 
-        convnet = model # ugly hack in case of DataParallel wrapping
-        model.forward = lambda x: forward_resnet(convnet, x)
+        model = WrapperModule(model, forward_resnet) # ugly hack in case of DataParallel wrapping
 
     elif opt['arch'] == 'fbresnet152':
         model = torch7_models.__dict__[opt['arch']](num_classes=1000,
                                                     pretrained='imagenet')
 
-        convnet = model # ugly hack in case of DataParallel wrapping
-        model.forward = lambda x: forward_resnet(convnet, x)
+        model = WrapperModule(model, forward_resnet) # ugly hack in case of DataParallel wrapping
 
     elif opt['arch'] in torch7_resnet_names:
         model = torch7_models.__dict__[opt['arch']](num_classes=1000,
                                                     pretrained='imagenet')
-        
-        convnet = model # ugly hack in case of DataParallel wrapping
-        model.forward = lambda x: forward_resnext(convnet, x)
+
+        model = WrapperModule(model, forward_resnext) # ugly hack in case of DataParallel wrapping
 
     else:
         raise ValueError
-    
+
     if data_parallel:
         model = nn.DataParallel(model).cuda()
         if not cuda:

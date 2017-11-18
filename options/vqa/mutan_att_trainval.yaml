@@ -12,8 +12,9 @@ vqa:
     samplingans: True
 coco:
     dir: data/coco
-    arch: fbresnet152torch
+    arch: fbresnet152
     mode: att
+    size: 448
 model:
     arch: MutanAtt
     dim_v: 2048

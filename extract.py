@@ -26,14 +26,14 @@ parser.add_argument('--dir_data', default='data/coco',
                     help='dir dataset to download or/and load images')
 parser.add_argument('--data_split', default='train', type=str,
                     help='Options: (default) train | val | test')
-parser.add_argument('--arch', '-a', default='resnet152',
+parser.add_argument('--arch', '-a', default='fbresnet152',
                     choices=convnets.model_names,
                     help='model architecture: ' +
                         ' | '.join(convnets.model_names) +
                         ' (default: fbresnet152)')
-parser.add_argument('--workers', default=4, type=int, 
+parser.add_argument('--workers', default=4, type=int,
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--batch_size', '-b', default=80, type=int, 
+parser.add_argument('--batch_size', '-b', default=80, type=int,
                     help='mini-batch size (default: 80)')
 parser.add_argument('--mode', default='both', type=str,
                     help='Options: att | noatt | (default) both')
@@ -56,7 +56,7 @@ def main():
     if args.dataset == 'coco':
         if 'coco' not in args.dir_data:
             raise ValueError('"coco" string not in dir_data')
-        dataset = datasets.COCOImages(args.data_split, dict(dir=args.dir_data), 
+        dataset = datasets.COCOImages(args.data_split, dict(dir=args.dir_data),
             transform=transforms.Compose([
                 transforms.Scale(args.size),
                 transforms.CenterCrop(args.size),
@@ -68,7 +68,7 @@ def main():
             raise ValueError('train split is required for vgenome')
         if 'vgenome' not in args.dir_data:
             raise ValueError('"vgenome" string not in dir_data')
-        dataset = datasets.VisualGenomeImages(args.data_split, dict(dir=args.dir_data), 
+        dataset = datasets.VisualGenomeImages(args.data_split, dict(dir=args.dir_data),
             transform=transforms.Compose([
                 transforms.Scale(args.size),
                 transforms.CenterCrop(args.size),
@@ -122,7 +122,7 @@ def extract(data_loader, model, path_file, mode):
 
         nb_regions = output_att.size(2) * output_att.size(3)
         output_noatt = output_att.sum(3).sum(2).div(nb_regions).view(-1, 2048)
-        
+
         batch_size = output_att.size(0)
         if mode == 'both' or mode == 'att':
             hdf5_att[idx:idx+batch_size]   = output_att.data.cpu().numpy()
@@ -141,7 +141,7 @@ def extract(data_loader, model, path_file, mode):
                    i, len(data_loader),
                    batch_time=batch_time,
                    data_time=data_time,))
-            
+
     hdf5_file.close()
 
     # Saving image names in the same order than extraction
