@@ -397,10 +397,12 @@ python train.py --vqa_trainsplit train --path_opt options/vqa/mutan_att.yaml --d
 You must set your local ip address and port in `demo_server.py`  line 169 and your global ip address and port in `demo_web/js/custom.js` line 51.
 The port associated to the global ip address must redirect to your local ip address.
 
-Then:
+Launch your API:
 ```
 CUDA_VISIBLE_DEVICES=0 python demo_sever.py
 ```
+
+Open `demo_web/index.html` on your browser to access the API with a human interface.
 
 ## Citation
 
