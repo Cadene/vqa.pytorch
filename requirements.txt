@@ -4,3 +4,6 @@ h5py
 pyyaml
 colorlover
 plotly
+scipy
+nltk
+click

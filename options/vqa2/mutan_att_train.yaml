@@ -1,9 +1,9 @@
 logs:
-    dir_logs: logs/vqa2/mutan_att_trainval
+    dir_logs: logs/vqa2/mutan_att_train
 vqa:
     dataset: VQA2
     dir: data/vqa2
-    trainsplit: trainval
+    trainsplit: train
     nans: 2000
     maxlength: 26
     minwcount: 0

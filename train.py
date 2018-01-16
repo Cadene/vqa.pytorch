@@ -357,7 +357,7 @@ def load_checkpoint(model, optimizer, path_ckpt):
         model.load_state_dict(model_state)
     else:
         print("Warning train.py: no model checkpoint found at '{}'".format(path_ckpt_model))
-    if os.path.isfile(path_ckpt_optim):
+    if optimizer is not None and os.path.isfile(path_ckpt_optim):
         optim_state = torch.load(path_ckpt_optim)
         optimizer.load_state_dict(optim_state)
     else:

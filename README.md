@@ -10,7 +10,8 @@ If you have any questions about our code or model, don't hesitate to contact us 
 
 #### News:
 
-- coming soon: pretrained models on VQA2, features of FBResnet152, web app demo
+- coming soon: features of FBResnet152
+- 16th january 2018: a pretrained vqa2 model and web demo
 - 18th july 2017: VQA2, VisualGenome, FBResnet152 (for pytorch) added [v2.0 commit msg](https://github.com/Cadene/vqa.pytorch/commit/42391fd4a39c31e539eb6cb73ecd370bac0f010a)
 - 16th july 2017: paper accepted at ICCV2017
 - 30th may 2017: poster accepted at CVPR2017 (VQA Workshop)
@@ -27,6 +28,9 @@ If you have any questions about our code or model, don't hesitate to contact us 
 * [Reproducing results on VQA 1.0](#reproducing-results-on-vqa-10)
     * [Features](#features)
     * [Pretrained models](#pretrained-models)
+* [Reproducing results on VQA 2.0](#reproducing-results-on-vqa-20)
+    * [Features](#features-20)
+    * [Pretrained models](#pretrained-models-20)
 * [Documentation](#documentation)
     * [Architecture](#architecture)
     * [Options](#options)
@@ -41,6 +45,7 @@ If you have any questions about our code or model, don't hesitate to contact us 
     * [Monitor training](#monitor-training)
     * [Restart training](#restart-training)
     * [Evaluate models on VQA](#evaluate-models-on-vqa)
+    * [Web demo](#web-demo)
 * [Citation](#citation)
 * [Acknowledgment](#acknowledgment)
 
@@ -167,6 +172,28 @@ python train.py -e --path_opt options/vqa/mutan_att_trainval.yaml --resume ckpt
 ```
 
 To obtain test and testdev results on VQA 1.0, you will need to zip your result json file (name it as `results.zip`) and to submit it on the [evaluation server](https://competitions.codalab.org/competitions/6961).
+
+
+## Reproducing results on VQA 2.0
+
+### Features 2.0
+
+You must download the coco dataset (and visual genome if needed) and then extract the features with a convolutional neural network.
+
+### Pretrained VQA models 2.0
+
+We currently provide three models trained with our current pytorch code on VQA 2.0
+
+- MutanAtt trained on the trainset with the fbresnet152 features,
+- MutanAtt trained on thetrainvalset with the fbresnet152 features.
+
+```
+cd $VQAPYTORCH
+mkdir -p logs/vqa2
+cd logs/vqa2
+wget http://data.lip6.fr/cadene/vqa.pytorch/vqa2/mutan_att_train.zip 
+wget http://data.lip6.fr/cadene/vqa.pytorch/vqa2/mutan_att_trainval.zip 
+```
 
 ## Documentation
 
@@ -363,6 +390,16 @@ Evaluate the model from the best checkpoint. If your model has been trained on t
 
 ```
 python train.py --vqa_trainsplit train --path_opt options/vqa/mutan_att.yaml --dir_logs logs/vqa/mutan_att --resume best -e
+```
+
+### Web demo
+
+You must set your local ip address and port in `demo_server.py`  line 169 and your global ip address and port in `demo_web/js/custom.js` line 51.
+The port associated to the global ip address must redirect to your local ip address.
+
+Then:
+```
+CUDA_VISIBLE_DEVICES=0 python demo_sever.py
 ```
 
 ## Citation

@@ -96,6 +96,8 @@ class AbstractAtt(nn.Module):
             x_att = F.softmax(x_att)
             list_att.append(x_att)
 
+        self.list_att = [x_att.data for x_att in list_att]
+
         # Apply attention vectors to input_v
         x_v = input_v.view(batch_size, self.opt['dim_v'], width * height)
         x_v = x_v.transpose(1,2)

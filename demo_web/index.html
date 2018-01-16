@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <title>VQA Demo MUTAN</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="css/custom.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <!--
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          -->
+          <a class="navbar-brand" href="#">Visual Question Answering</a>
+        </div>
+        <!--<div id="navbar" class="navbar-collapse collapse">
+          <form class="navbar-form navbar-right">
+            <div class="form-group">
+              <input type="text" placeholder="Email" class="form-control">
+            </div>
+            <div class="form-group">
+              <input type="password" placeholder="Password" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-success">Sign in</button>
+          </form>
+        </div>
+      </div>
+      -->
+    </nav>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+      <div class="container">
+        <h3>Welcome to the demo page</h3>
+        <p>The VQA task is about training models in a end-to-end fashion on a multimodal dataset made of triplets: (image, question, answer). We recently proposed a new model called MUTAN based on Neural Networks and the Tucker Decomposition to address this machine learning problem. Please, try out our latest model :)</p>  
+        <!--<img src="https://raw.githubusercontent.com/Cadene/vqa.pytorch/master/doc/vqa_task.png" width=40%/>-->
+        <p>Best regards. <a href="http://remicadene.com">Remi Cadene</a>, <a href="https://twitter.com/labegne">Hedi Ben-Younes</a>, <a href="http://webia.lip6.fr/~cord">Matthieu Cord</a> and <a href="http://webia.lip6.fr/~thomen">Nicolas Thome</a>.</p>
+        <p>
+          <a class="btn btn-primary btn-lg" href="https://github.com/Cadene/vqa.pytorch" role="button">Github &raquo;</a>
+          <a class="btn btn-primary btn-lg" href="https://arxiv.org/abs/1705.06676" role="button">Paper &raquo;</a>
+        </p>
+      </div>
+    </div>
+
+    <!--
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h2>Heading</h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        </div>
+        <div class="col-md-4">
+          <h2>Heading</h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+       </div>
+        <div class="col-md-4">
+          <h2>Heading</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+        </div>
+      </div>
+    </div>
+  -->
+
+      
+
+      <div class="container">
+        <h2>API</h2>
+      <!-- Example row of columns -->
+        <div class="row">
+          <h3></h3>
+          <form name="formBasic" id="formBasic">
+            <div class="col-md-4">
+              <input type="hidden" name="function" value="basic-form">
+                <div class="form-group">
+                  <label>1. Upload an image</label>
+                  <div class="input-group">
+                      <span class="input-group-btn">
+                          <span class="btn btn-default btn-file">Browse...<input type="file" id="imgInp">
+                          </span>
+                      </span>
+                      <input type="text" class="form-control" readonly>
+                  </div>
+                  <img id='vqa-visual'/>
+                </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="message-text" class="control-label">2. Ask a question about this image</label>
+                <textarea class="form-control" id="vqa-question"></textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="basic-submit">Ask MUTAN</button>
+              </div>
+            </div>
+          </form>
+          <div class="col-md-4">
+            <label for="message-text" class="control-label">3. Receive the answer</label>
+            <div id="vqa-answer">MUTAN is waiting for your question. <img src="https://static.comicvine.com/uploads/original/11124/111247756/5020954-walle.jpg" width="10%"/></div>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+      <!-- Question 
+
+      <div class="modal-body">
+        <form name="formBasic" id="formBasic">
+          <input type="hidden" name="function" value="basic-form">
+            <div class="form-group">
+              <label>1. Upload an image</label>
+              <div class="input-group">
+                  <span class="input-group-btn">
+                      <span class="btn btn-default btn-file">Browse...<input type="file" id="imgInp">
+                      </span>
+                  </span>
+                  <input type="text" class="form-control" readonly>
+              </div>
+              <img id='img-upload'/>
+            </div>
+           <div class="form-group">
+             <label for="message-text" class="control-label">2. Ask a question about this image</label>
+             <textarea class="form-control" id="customized-information"></textarea>
+           </div>
+       </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="basic-submit">Add to Cart</button>
+       </div>
+
+      -->
+
+      <footer>
+        <p><center><img width="100px" src="https://www.dropbox.com/s/gnavxrwnvqqoeis/logos.png?raw=1"/></center></p>
+      </footer>
+    </div> <!-- /container -->
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/custom.js"></script>
+  </body>
+</html>
