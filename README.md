@@ -400,7 +400,7 @@ The port associated to the global ip address must redirect to your local ip addr
 
 Launch your API:
 ```
-CUDA_VISIBLE_DEVICES=0 python demo_sever.py
+CUDA_VISIBLE_DEVICES=0 python demo_server.py
 ```
 
 Open `demo_web/index.html` on your browser to access the API with a human interface.
